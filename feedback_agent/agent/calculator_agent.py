@@ -18,7 +18,7 @@ def calculator(a: int, b: int, operator: Annotated[Operator, "operator"]) -> int
 
 
 LLM_CONFIG = {
-    "model": "llama3.1:8b",
+    "model": "mistral:7b-instruct",
     "client_host": "127.0.0.1:11434",
     "api_type": "ollama",
     "num_predict": -1,
