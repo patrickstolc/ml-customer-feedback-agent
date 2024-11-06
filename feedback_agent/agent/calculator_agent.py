@@ -18,17 +18,18 @@ def calculator(a: int, b: int, operator: Annotated[Operator, "operator"]) -> int
 
 
 LLM_CONFIG = {
-    "model": "mistral:7b-instruct",
+    "model": "llama3.1:8b",
     "client_host": "127.0.0.1:11434",
     "api_type": "ollama",
     "num_predict": -1,
     "repeat_penalty": 1.1,
-    "seed": 42,
     "stream": False,
+    "seed": 42,
     "temperature": 1,
     "top_k": 50,
     "top_p": 0.8,
-    "native_tool_calls": False
+    "native_tool_calls": False,
+    "cache_seed": None,
 }
 
 def create_calculator_agent() -> ConversableAgent:
@@ -61,7 +62,7 @@ def create_user_proxy():
 def main():
     user_proxy = create_user_proxy()
     calculator_agent = create_calculator_agent()
-    chat_result = user_proxy.initiate_chat(calculator_agent, message="What is (44232 + 13312 / (232 - 32)) * 5?")
+    chat_result = user_proxy.initiate_chat(calculator_agent, cache=None, message="What is (44232 + 13312 / (232 - 32)) * 5?")
     print(chat_result)
 
 if __name__ == "__main__":

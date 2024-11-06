@@ -16,7 +16,8 @@ LLM_CONFIG = {
     "temperature": 1,
     "top_k": 50,
     "top_p": 0.8,
-    "native_tool_calls": False
+    "native_tool_calls": False,
+    "cache_seed": None
 }
 
 def create_feedback_analysis_agent() -> ConversableAgent:
@@ -71,7 +72,8 @@ def main():
                     {"id": "3", "sentiment": "neutral"}
                 ]
                 4. Return the JSON object.
-                """
+                """,
+                cache=None
     )
 
 if __name__ == "__main__":
