@@ -1,6 +1,6 @@
 from autogen import ConversableAgent
-
 from typing import Annotated, Literal
+from feedback_agent.config import LLM_CONFIG
 
 Operator = Literal["+", "-", "*", "/"]
 
@@ -16,21 +16,6 @@ def calculator(a: int, b: int, operator: Annotated[Operator, "operator"]) -> int
     else:
         raise ValueError("Invalid operator")
 
-
-LLM_CONFIG = {
-    "model": "llama3.1:8b",
-    "client_host": "127.0.0.1:11434",
-    "api_type": "ollama",
-    "num_predict": -1,
-    "repeat_penalty": 1.1,
-    "stream": False,
-    "seed": 42,
-    "temperature": 1,
-    "top_k": 50,
-    "top_p": 0.8,
-    "native_tool_calls": False,
-    "cache_seed": None,
-}
 
 def create_calculator_agent() -> ConversableAgent:
     # define the agent
