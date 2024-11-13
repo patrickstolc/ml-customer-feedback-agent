@@ -20,9 +20,6 @@ Observation: the result of the action. Only observe tools' outputs.
 Thought: I now know the final answer
 Final Answer: the final answer to the original input question and should be a result of the provided tools and nothing else
 
-Example of final answer: 
-Final Answer: 8.5
-
 Begin!
 Question: {input}
 """
@@ -42,7 +39,7 @@ def create_feedback_analysis_agent() -> AssistantAgent:
     agent = AssistantAgent(
         name="Assistant",
         system_message="""
-        Only use the tools you have been provided with. Reply TERMINATE when the task is done.
+        Only use tools. Don't try to reason. Reply TERMINATE when the task is done.
         """,
         llm_config=LLM_CONFIG
     )
@@ -60,7 +57,7 @@ def create_user_proxy(code_executor: LocalCommandLineCodeExecutor):
         human_input_mode="NEVER",
         max_consecutive_auto_reply=10,
         code_execution_config={
-            "executor": code_executor,
+            "executor": code_executor
         },
     )
     return user_proxy
@@ -99,7 +96,7 @@ def setup_agents():
         caller=feedback_analysis_agent, 
         executor=user_proxy, 
         name="sentiment_analysis", 
-        description="Analyze the sentiment of a customer feedback given a list of strings, it returns a list of integers."
+        description="Returns sentiment of a customer feedback given a list of feedback strings."
     )
 
     # Add the calculate average tool to the feedback analysis agent and user proxy agent

@@ -1,5 +1,5 @@
 LLM_CONFIG = {
-    "model": "llama3.1:8b",
+    "model": "qwen2.5-coder:3b",
     "client_host": "127.0.0.1:11434",
     "api_type": "ollama",
     "num_predict": -2,

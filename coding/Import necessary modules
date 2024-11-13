@@ -1,0 +1,34 @@
+# Import necessary modules
+import datetime
+import yfinance as yf
+
+# Define the ticker symbols
+ticker_symbols = ["MSFT", "TSLA"]
+
+# Get the current date
+current_date = datetime.date.today()
+
+# Fetch historical data for each ticker symbol
+max_ytd_gain = float('-inf')
+min_ytd_gain = float('inf')
+
+for ticker in ticker_symbols:
+    try:
+        data = yf.download(ticker, period="1y")
+        if not data.empty:
+            # Calculate year-to-date gain
+            ytd_gain = (data["Close"][-1] - data["Close"][0]) / data["Close"][0] * 100
+            print(f"{ticker}: {ytd_gain:.2f}%")
+
+            # Update max and min values
+            if ytd_gain > max_ytd_gain:
+                max_ytd_gain = ytd_gain
+            if ytd_gain < min_ytd_gain:
+                min_ytd_gain = ytd_gain
+        else:
+            print(f"Error downloading data for {ticker}: Data is empty")
+    except Exception as e:
+        print(f"Error downloading data for {ticker}: {e}")
+
+print(f"Highest year-to-date gain: {max_ytd_gain:.2f}%")
+print(f"Lowest year-to-date gain: {min_ytd_gain:.2f}")
