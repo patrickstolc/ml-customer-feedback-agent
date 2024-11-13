@@ -20,20 +20,7 @@ def sentiment_analysis(text: Annotated[List[str], "A list of strings"]) -> Annot
                       Don't include any other text in your response.
                       Return 'FINISH' when the task is done.""",
         is_termination_msg=lambda msg: msg.get("content") is not None and "FINISH" in msg["content"],
-        llm_config={
-            "model": "llama3.2:3b",
-            "client_host": "127.0.0.1:11434",
-            "api_type": "ollama",
-            "num_predict": -2,
-            "repeat_penalty": 1.1,
-            "stream": False,
-            "seed": 42,
-            "temperature": 0,
-            "top_k": 50,
-            "top_p": 0.8,
-            "native_tool_calls": False,
-            "cache_seed": None,
-        },
+        llm_config=LLM_CONFIG,
     )    
     user_proxy = UserProxyAgent(
         name="User",
