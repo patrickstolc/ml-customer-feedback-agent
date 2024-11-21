@@ -10,11 +10,32 @@ Install the Python dependencies.
 pip install -r requirements.txt
 ```
 
-## Run the agent
+## Run the agent (solution)
 
 ```bash
-python -m feedback_agent.agent.feedback_analysis_agent
+python -m feedback_agent.agent.feedback_analysis_agent --mode [sentiment_analysis|keyword_extraction|categorization|categorize_and_extract_keywords]
 ```
+
+Running the agent to analyze sentiment:
+
+```bash
+python -m feedback_agent.agent.feedback_analysis_agent --mode sentiment_analysis
+```
+
+Running the agent to extract keywords:
+
+```bash
+python -m feedback_agent.agent.feedback_analysis_agent --mode keyword_extraction
+```
+
+Running the agent to categorize feedback:
+
+```bash
+python -m feedback_agent.agent.feedback_analysis_agent --mode categorization
+```
+
+> [!NOTE]
+> The agent has been developed using `llama3.1:8b`. Using other models may lead to different results.
 
 ## Requirements
 
