@@ -1,4 +1,6 @@
+import random
 from typing import List
 
 def extract_keywords(text: str) -> List[str]:
-    return ["keyword1", "keyword2", "keyword3"]
+    words = text.split()
+    return random.sample(words, min(len(words), 5))
