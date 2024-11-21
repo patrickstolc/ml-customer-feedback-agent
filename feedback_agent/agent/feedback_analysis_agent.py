@@ -2,25 +2,26 @@ import ast
 from autogen import AssistantAgent, UserProxyAgent, ChatResult, register_function
 from autogen.coding import LocalCommandLineCodeExecutor
 from feedback_agent.tools.feedback_reader_tool import feedback_reader
-from feedback_agent.tools.sentiment_analysis_tool import sentiment_analysis
-from feedback_agent.tools.calculate_average_tool import calculate_average
+from feedback_agent.tools.send_message_tool import send_message
 from feedback_agent.config import LLM_CONFIG
 
 ReAct_prompt = """
-Answer the following questions as best you can. You have access to the tools provided.
+You are an AI agent designed to solve complex problems by breaking them down into manageable steps. 
 
-Use the following format:
+Your instructions:
+1. Plan your actions: First, analyze the question and outline a clear, step-by-step plan for how you will solve it. Include which tools you'll use and in what sequence.
+2. Explain your plan: Clearly explain your reasoning and how each step contributes to solving the problem.
+3. Execute your plan: Call one tool at a time in the order you planned. Make sure to capture and pass the output of each tool to the next step appropriately.
+4. Provide the final answer: After all tools have been used and you have derived the final result, present the answer clearly.
 
-Question: the input question you must answer
-Thought: you should always think about what to do and what tool to use
-Action: the action to take is ALWAYS one of the provided tools
-Action Input: the input to the action
-Observation: the result of the action. Only observe tools' outputs.
-... (this thought/action/action input/observation can repeat N times)
-Thought: I now know the final answer
-Final Answer: the final answer to the original input question and should be a result of the provided tools and nothing else
+Remember: 
+- Do not call all tools at once. 
+- Each tool call must be followed by analyzing its output before moving to the next step.
+- Always complete the plan and get the final answer.
+- User will reply with the result of the tool call.
 
-Begin!
+Let's go step-by-step.
+
 Question: {input}
 """
 
@@ -39,7 +40,7 @@ def create_feedback_analysis_agent() -> AssistantAgent:
     agent = AssistantAgent(
         name="Assistant",
         system_message="""
-        Only use tools. Don't try to reason. Reply TERMINATE when the task is done.
+        Reply TERMINATE when the task is done.
         """,
         llm_config=LLM_CONFIG
     )
@@ -90,22 +91,13 @@ def setup_agents():
         description="Read customer feedback, optionally filtered by start_date and end_date as YYYY-MM-DD formatted strings."
     )
 
-    # Add the sentiment analysis tool to the feedback analysis agent and user proxy agent
+    # Add the send message tool to the feedback analysis agent and user proxy agent
     register_function(
-        sentiment_analysis, 
+        send_message, 
         caller=feedback_analysis_agent, 
         executor=user_proxy, 
-        name="sentiment_analysis", 
-        description="Returns sentiment of a customer feedback given a list of feedback strings."
-    )
-
-    # Add the calculate average tool to the feedback analysis agent and user proxy agent
-    register_function(
-        calculate_average, 
-        caller=feedback_analysis_agent, 
-        executor=user_proxy, 
-        name="calculate_average", 
-        description="Calculate the average given a list of numbers."
+        name="send_message", 
+        description="Send a message to the user."
     )
 
     # Return the user proxy and feedback analysis agent
@@ -158,7 +150,7 @@ def main():
     user_proxy, feedback_analysis_agent = setup_agents()
 
     # Define the task
-    task = "What is the average feedback sentiment in Q1 2024?"
+    task = "What is the average feedback sentiment in Q1 2024? Score feedback sentiment between 0 and 5. Send a message with the final answer."
 
     # Initiate the chat
     user_proxy.initiate_chat(
