@@ -2,27 +2,16 @@ import ast
 import copy
 from autogen import AssistantAgent, UserProxyAgent, ChatResult, register_function
 from autogen.coding import LocalCommandLineCodeExecutor
+from autogen.code_utils import create_virtual_env
 from feedback_agent.tools.feedback_reader_tool import feedback_reader
-from feedback_agent.tools.sentiment_analysis_tool import sentiment_analysis
-from feedback_agent.tools.calculate_average_tool import calculate_average
 from feedback_agent.config import LLM_CONFIG
+from feedback_agent.agent.code_executing_agent import CODING_AGENT_SYSTEM_MESSAGE
 
 ReAct_prompt = """
-Answer the following questions as best you can. You have access to the tools provided.
-
-Use the following format:
-
-Question: the input question you must answer
-Thought: you should always think about what to do and what tool to use
-Action: the action to take is ALWAYS one of the provided tools
-Action Input: the input to the action
-Observation: the result of the action. Only observe tools' outputs.
-... (this thought/action/action input/observation can repeat N times)
-Thought: I now know the final answer
-Final Answer: the final answer to the original input question and should be a result of the provided tools and nothing else
-
-Begin!
+Answer the following questions as best you can. You have access to the tools provided and the ability to write PYTHON code.
 Question: {input}
+
+Once you've answered the question, reply with TERMINATE.
 """
 
 
@@ -39,9 +28,7 @@ def create_feedback_analysis_agent() -> AssistantAgent:
     """
     agent = AssistantAgent(
         name="Assistant",
-        system_message="""
-        Only use tools. Don't try to reason. Reply TERMINATE when the task is done.
-        """,
+        system_message=CODING_AGENT_SYSTEM_MESSAGE,
         llm_config=copy.deepcopy(LLM_CONFIG)
     )
 
@@ -68,7 +55,12 @@ def create_local_code_executor():
     """
     Return a new local code executor.
     """
+    venv_dir = ".venv"
+    venv_context = create_virtual_env(venv_dir)
+
     return LocalCommandLineCodeExecutor(
+        work_dir="coding",
+        virtual_env_context=venv_context,
         timeout=100,
     )
 
@@ -90,26 +82,6 @@ def setup_agents():
         executor=user_proxy, 
         name="feedback_reader", 
         description="Read customer feedback, optionally filtered by start_date and end_date as YYYY-MM-DD formatted strings."
-    )
-
-    # Add the sentiment analysis tool to the feedback analysis agent and user proxy agent
-    print("registering sentiment analysis")
-    register_function(
-        sentiment_analysis, 
-        caller=feedback_analysis_agent, 
-        executor=user_proxy, 
-        name="sentiment_analysis", 
-        description="Returns sentiment of a customer feedback given a list of feedback strings."
-    )
-
-    # Add the calculate average tool to the feedback analysis agent and user proxy agent
-    print("registering calculate average")
-    register_function(
-        calculate_average, 
-        caller=feedback_analysis_agent, 
-        executor=user_proxy, 
-        name="calculate_average", 
-        description="Calculate the average given a list of numbers."
     )
 
     # Return the user proxy and feedback analysis agent
@@ -162,12 +134,13 @@ def main():
     user_proxy, feedback_analysis_agent = setup_agents()
 
     # Define the task
-    task = "What is the sentiment of feeedback from Q1 in 2024?"
+    task = "What is the NUMERICAL AVERAGE sentiment of feedback from Q1 in 2024?"
 
     # Initiate the chat
     user_proxy.initiate_chat(
         feedback_analysis_agent,
-        message=task,
+        message=react_prompt_message,
+        question=task,
     )
 
 
